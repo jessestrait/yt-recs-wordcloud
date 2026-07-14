@@ -75,5 +75,6 @@ var grand=Object.keys(totals).reduce(function(s,k){return s+totals[k].t;},0);
 var bar=document.getElementById('sig-bar');
 Object.keys(totals).forEach(function(n){var pct=(totals[n].t/grand*100).toFixed(2);if(parseFloat(pct)<0.5)return;var seg=document.createElement('div');seg.className='seg';seg.style.cssText='width:'+pct+'%;background:'+totals[n].c+';flex-shrink:0;';bar.appendChild(seg);});
 </script>
+<script data-goatcounter="https://jesserstrait.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
