@@ -112,8 +112,9 @@ var excludeSet={};
 coloredW.slice(0,EXCLUDE_TOP_N).forEach(function(w){excludeSet[w]=1;});
 var distinctW=coloredW.filter(function(w){return freq[w]>=2&&!excludeSet[w];});
 var maxDistinctFreq=distinctW.length?Math.max.apply(null,distinctW.map(function(w){return freq[w];})):2;
-var distinctRange=Math.max(maxDistinctFreq-2,1);
-var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.round(22+(freq[w]-2)/distinctRange*85),getColor(w)];});
+var sqrtMin=Math.sqrt(2);
+var sqrtRange=Math.max(Math.sqrt(maxDistinctFreq)-sqrtMin,0.0001);
+var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.round(22+(Math.sqrt(freq[w])-sqrtMin)/sqrtRange*85),getColor(w)];});
 
 var canvas=document.getElementById("wc");
 canvas.width=canvas.parentElement.offsetWidth-48;
