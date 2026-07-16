@@ -11,6 +11,9 @@
   .date { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; }
   .back { font-size: 0.8rem; color: #475569; text-decoration: none; border: 1px solid #1e293b; padding: 4px 10px; border-radius: 6px; }
   .back:hover { color: #94a3b8; border-color: #334155; }
+  .mode-btn { background: transparent; cursor: pointer; font-family: inherit; }
+  .mode-btn.active { background: #00B0FF; color: #0f172a; border-color: #00B0FF; font-weight: 600; }
+  .mode-btn.active:hover { background: #38C4FF; color: #0f172a; }
   #wc-wrap { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
   canvas { width: 100%; display: block; }
   .legend { display: flex; gap: 14px; justify-content: center; margin-bottom: 1.5rem; font-size: 0.72rem; color: #64748b; flex-wrap: wrap; }
@@ -28,7 +31,10 @@
     <div class="date">April 28, 2026</div>
     <div style="font-size:0.75rem;color:#475569;margin-top:4px;">103 videos &middot; NRC EmoLex + Cymbolism analysis</div>
   </div>
-  <a class="back" href="../yt-wordcloud-index.html">&larr; all days</a>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button id="distinct-btn" class="back mode-btn" type="button">Distinct</button>
+    <a class="back" href="../yt-wordcloud-index.html">&larr; all days</a>
+  </div>
 </header>
 <div id="wc-wrap"><canvas id="wc"></canvas></div>
 <div class="legend">
@@ -99,11 +105,33 @@ var allW=Object.keys(freq).filter(function(w){return w.length>2;}).sort(function
 var coloredW=allW.filter(function(w){return emotionOf(w)!==null&&!NAMES[w];});
 var topW=coloredW.slice(0,130).map(function(w){return[w,Math.round(15+15*Math.sqrt(freq[w])),getColor(w)];});
 
+// "Distinct" view -- drops the most-repeated words so rarer, more specific
+// vocabulary gets the visual weight instead of being crowded out by them
+var EXCLUDE_TOP_N=12;
+var excludeSet={};
+coloredW.slice(0,EXCLUDE_TOP_N).forEach(function(w){excludeSet[w]=1;});
+var distinctW=coloredW.filter(function(w){return freq[w]>=2&&!excludeSet[w];});
+var maxDistinctFreq=distinctW.length?Math.max.apply(null,distinctW.map(function(w){return freq[w];})):2;
+var distinctRange=Math.max(maxDistinctFreq-2,1);
+var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.round(22+(freq[w]-2)/distinctRange*85),getColor(w)];});
+
 var canvas=document.getElementById("wc");
 canvas.width=canvas.parentElement.offsetWidth-48;
 canvas.height=440;
 
-WordCloud(canvas,{list:topW,gridSize:7,weightFactor:2.4,fontFamily:"system-ui, sans-serif",fontWeight:"700",color:function(w){return getColor(w);},rotateRatio:0.25,rotationSteps:2,backgroundColor:"#0f172a",shrinkToFit:true,minSize:9});
+function drawCloud(list){
+  WordCloud(canvas,{list:list,gridSize:7,weightFactor:2.4,fontFamily:"system-ui, sans-serif",fontWeight:"700",color:function(w){return getColor(w);},rotateRatio:0.25,rotationSteps:2,backgroundColor:"#0f172a",shrinkToFit:true,minSize:9});
+}
+drawCloud(topW);
+
+var showingDistinct=false;
+var distinctBtn=document.getElementById("distinct-btn");
+distinctBtn.addEventListener("click",function(){
+  showingDistinct=!showingDistinct;
+  drawCloud(showingDistinct?topWDistinct:topW);
+  distinctBtn.textContent=showingDistinct?"All Words":"Distinct";
+  distinctBtn.classList.toggle("active",showingDistinct);
+});
 
 // Emotion signature bar
 var totals={};
