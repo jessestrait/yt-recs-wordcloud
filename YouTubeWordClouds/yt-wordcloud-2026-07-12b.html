@@ -59,9 +59,35 @@ var NRC={"abacus":"trust","abandon":"fear","abandoned":"anger","abandonment":"an
 
 var C={joy:"#FFE000",trust:"#00B0FF",fear:"#AA00FF",surprise:"#FF4081",sadness:"#7986CB",disgust:"#C6D400",anger:"#FF1744",anticipation:"#FF6D00"};
 
+// Manual overrides -- words the NRC lexicon misses but are clearly classifiable
+// in this feed's context (recurring thinkers and themes)
+var OVR={"watts":"joy","alan":"joy","greene":"anger","robert":"anger","bukowski":"sadness","psychology":"trust","financial":"anticipation","audit":"fear","solved":"joy","trauma":"sadness","shadow":"fear","crisis":"fear","rsd":"sadness","empire":"anger","democracy":"trust","habits":"anticipation","signs":"anticipation","become":"anticipation","work":"anticipation","best":"joy"};
+
+function stem(w){
+  var c=[];
+  if(w.length>4&&w.slice(-3)==="ies")c.push(w.slice(0,-3)+"y");
+  if(w.length>4&&w.slice(-2)==="es")c.push(w.slice(0,-2));
+  if(w.length>3&&w.slice(-1)==="s"&&w.slice(-2)!=="ss")c.push(w.slice(0,-1));
+  if(w.length>5&&w.slice(-3)==="ing"){c.push(w.slice(0,-3));c.push(w.slice(0,-3)+"e");}
+  if(w.length>4&&w.slice(-2)==="ed"){c.push(w.slice(0,-2));c.push(w.slice(0,-1));}
+  return c;
+}
+
+function emotionOf(w){
+  if(w==="trump")return"trump";
+  if(OVR[w])return OVR[w];
+  if(NRC[w])return NRC[w];
+  var cands=stem(w);
+  for(var i=0;i<cands.length;i++){
+    if(OVR[cands[i]])return OVR[cands[i]];
+    if(NRC[cands[i]])return NRC[cands[i]];
+  }
+  return null;
+}
+
 function getColor(w){
-  if(w==="trump")return"#D50000";
-  var e=NRC[w];
+  var e=emotionOf(w);
+  if(e==="trump")return"#D50000";
   return e?C[e]:"#334e6a";
 }
 
@@ -78,7 +104,7 @@ WordCloud(canvas,{list:topW,gridSize:7,weightFactor:2.4,fontFamily:"system-ui, s
 var totals={};
 var emos=["joy","trust","fear","surprise","sadness","disgust","anger","anticipation"];
 emos.forEach(function(e){
-  var t=allW.reduce(function(s,w){return NRC[w]===e?s+freq[w]:s;},0);
+  var t=allW.reduce(function(s,w){return emotionOf(w)===e?s+freq[w]:s;},0);
   if(t>0)totals[e]={c:C[e],t:t};
 });
 var trumpT=(freq["trump"]||0)*4;
