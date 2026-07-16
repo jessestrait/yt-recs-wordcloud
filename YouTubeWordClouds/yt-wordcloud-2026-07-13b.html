@@ -134,9 +134,14 @@ var topW=coloredW.slice(0,130).map(function(w){return[w,Math.round(15+15*Math.sq
 var EXCLUDE_TOP_N=12;
 var excludeSet={};
 coloredW.slice(0,EXCLUDE_TOP_N).forEach(function(w){excludeSet[w]=1;});
-var distinctW=coloredW.filter(function(w){return freq[w]>=2&&!excludeSet[w];});
-var maxDistinctFreq=distinctW.length?Math.max.apply(null,distinctW.map(function(w){return freq[w];})):2;
-var sqrtMin=Math.sqrt(2);
+// No frequency floor here -- on smaller runs (under ~200 videos) requiring
+// freq>=2 left as few as 10-15 words after exclusion, a nearly-empty canvas.
+// Singleton words fill it out; slice(0,130) still caps larger runs the same.
+var distinctW=coloredW.filter(function(w){return !excludeSet[w];});
+var distinctFreqs=distinctW.map(function(w){return freq[w];});
+var minDistinctFreq=distinctFreqs.length?Math.min.apply(null,distinctFreqs):1;
+var maxDistinctFreq=distinctFreqs.length?Math.max.apply(null,distinctFreqs):2;
+var sqrtMin=Math.sqrt(minDistinctFreq);
 var sqrtRange=Math.max(Math.sqrt(maxDistinctFreq)-sqrtMin,0.0001);
 var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.round(22+(Math.sqrt(freq[w])-sqrtMin)/sqrtRange*85),getColor(w)];});
 
