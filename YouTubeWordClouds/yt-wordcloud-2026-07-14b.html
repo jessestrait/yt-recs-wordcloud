@@ -127,7 +127,7 @@ var NAMES={"trump":1,"jung":1,"carl":1,"alan":1,"watts":1,"robert":1,"greene":1,
 
 var allW=Object.keys(freq).filter(function(w){return w.length>2;}).sort(function(a,b){return freq[b]-freq[a];});
 var coloredW=allW.filter(function(w){return emotionOf(w)!==null&&!NAMES[w];});
-var topW=coloredW.slice(0,130).map(function(w){return[w,Math.round(15+15*Math.sqrt(freq[w])),getColor(w)];});
+var topW=coloredW.slice(0,130).map(function(w){return[w,Math.min(60,Math.round(15+15*Math.sqrt(freq[w]))),getColor(w)];});
 
 // "Distinct" view -- drops the most-repeated words so rarer, more specific
 // vocabulary gets the visual weight instead of being crowded out by them
@@ -143,7 +143,7 @@ var minDistinctFreq=distinctFreqs.length?Math.min.apply(null,distinctFreqs):1;
 var maxDistinctFreq=distinctFreqs.length?Math.max.apply(null,distinctFreqs):2;
 var sqrtMin=Math.sqrt(minDistinctFreq);
 var sqrtRange=Math.max(Math.sqrt(maxDistinctFreq)-sqrtMin,0.0001);
-var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.round(22+(Math.sqrt(freq[w])-sqrtMin)/sqrtRange*85),getColor(w)];});
+var topWDistinct=distinctW.slice(0,130).map(function(w){return[w,Math.min(75,Math.round(22+(Math.sqrt(freq[w])-sqrtMin)/sqrtRange*85)),getColor(w)];});
 
 var canvas=document.getElementById("wc");
 canvas.width=canvas.parentElement.offsetWidth-48;
